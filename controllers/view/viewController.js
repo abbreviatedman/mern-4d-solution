@@ -1,5 +1,6 @@
 // Gives access to the collection in our database
 const Pokemon = require("../../models/pokemonModel");
+const {sendGenericError} = require('../../utilities/utilities');
 /*
     11. A) Import the User collection
 */
@@ -105,6 +106,23 @@ const renderUserPage = async (req, res) => {
     16. Set up front-end function to log the user out
 */
 
+const logOutUser = (req, res) => {
+  try {
+    res.clearCookie('connect.sid', {
+      path: '/',
+      httpOnly: true,
+      secure: false,
+      maxAge: null,
+    })
+
+    req.session.destroy();
+
+    res.redirect('/login');
+  } catch (error) {
+    sendGenericError(res, 'failure in logout', error)
+  }
+}
+
 module.exports = {
   renderAllPokemon,
   renderOnePokemon,
@@ -113,4 +131,5 @@ module.exports = {
   renderSignUp,
   renderLogIn,
   renderUserPage,
+  logOutUser,
 };

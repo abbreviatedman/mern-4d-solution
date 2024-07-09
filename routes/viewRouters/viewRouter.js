@@ -11,6 +11,7 @@ const {
   renderSignUp,
   renderLogIn,
   renderUserPage,
+  logOutUser,
 } = require("../../controllers/view/viewController");
 
 router.get("/", (req, res) => {
@@ -38,5 +39,6 @@ router.get('/user', renderUserPage);
 /*
     17. Set up log out route to end sessions
 */
+router.get('/logOut', logOutUser);
 
 module.exports = router;
