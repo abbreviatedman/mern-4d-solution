@@ -32,7 +32,13 @@
     <br>
     <br>
     <!-- 20. Add the "Add this pokemon to favorite" button -->
-    
+    <% if (isFaved) { %>
+        <p>You've favorited this pokemon!</p>
+    <% } else { %>
+        <form action="/api/user/addFavoritePokemon?_method=PUT&pokeId=<%= pokemon._id %>" method="post">
+            <input type="submit" name="_method" value="Favorite Me!" />
+        </form>
+    <% } %>
 
     <br>
     <br>

@@ -64,22 +64,10 @@ const logInUser = async (req, res) => {
 
 const addFavoritePokemon = async (req, res) => {
     try {
-        // if (!req.session.isAuth) {
-        //     res.status(500).json({
-        //         message: 'failure adding a favorite pokemon',
-        //         payload: 'user is not logged in'
-        //     })
-
-        //     return;
-        // }
-
-        const user = await User.findById(req.body.userId);
-        user.favoritePokemon.push(req.body.pokeId);
-        const updatedUser = await user.save();
-        res.status(200).json({
-            message: 'success',
-            payload: updatedUser,
-        })
+        const user = await User.findById(req.session.user.id);
+        user.favoritePokemon.push(req.query.pokeId);
+        await user.save();
+        res.redirect('/user')
     } catch (error) {
         sendGenericError(res, 'failure in adding favorite pokemon', error);
     }

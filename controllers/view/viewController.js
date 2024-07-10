@@ -1,5 +1,6 @@
 // Gives access to the collection in our database
 const Pokemon = require("../../models/pokemonModel");
+const User = require("../../models/userModel");
 const {sendGenericError} = require('../../utilities/utilities');
 /*
     11. A) Import the User collection
@@ -20,19 +21,12 @@ async function renderAllPokemon(req, res) {
 // Return a web page to the client with ONE document in the collection
 async function renderOnePokemon(req, res) {
   try {
-    // console.log(`req.params.name: ${req.params.name}`);
-
-    // This returns array, even if it's just one result.
-    let result = await Pokemon.find({ Name: req.params.name });
-
-    // console.log(`result ${result}`);
-
-    /*
-            21. Modify renderOnePokemon() to show the page based on the login session
-        */
-
-    // Use oneMon.ejs file, all data will be in pokemon
-    res.render("oneMon", { pokemon: result[0] });
+    const pokemon = await Pokemon.findOne({ Name: req.params.name });
+    // search for the current user in the database
+    const user = await User.findById(req.session.user.id)
+    // check if the current pokemon's id is in the user's favoritePokemon array
+    const isFaved = user.favoritePokemon.includes(pokemon._id);
+    res.render("oneMon", { pokemon: pokemon, isFaved: isFaved });
   } catch (error) {
     console.log(`renderOnePokemon error: ${error}`);
   }
@@ -91,7 +85,19 @@ const renderUserPage = async (req, res) => {
       return;
     }
 
-    res.render('user', { username: req.session.user.username })
+    const user = await User.findOne({username: req.session.user.username})
+    const pokeIds = user.favoritePokemon;
+    // Find all Pokemon whose id is in the pokeIds array.
+    // The .select is how you use "projection", a technique for having the
+    // database only send some fields from each document. This saves you time
+    // and money in network transfer.
+    const pokemons = await Pokemon
+      .find({_id: {$in: pokeIds}})
+      .select({Name: true, _id: false})
+
+    const pokeNames = pokemons.map((pokemon) => pokemon.Name)
+
+    res.render('user', { username: user.username, pokeNames })
   } catch (error) {
     const packet = {
       message: 'failure in rendering user page',
